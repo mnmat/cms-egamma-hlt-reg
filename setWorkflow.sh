@@ -21,7 +21,7 @@ scramv1 b -j 8
 
 #Setup for making flat ntuple and doing regression
 #git clone -b Run3_2023_rverma_CMSSW_12_6_3 git@github.com:ravindkv/EgRegresTrainerLegacy.git #Only compatible with CMSSW_12_6_3
-clone -b Run3_2023_mmatthew_CMSSW_13_1_0 git@github.com:mnmat/EgRegresTrainerLegacy.git 
+git clone -b Run3_2023_mmatthew_CMSSW_13_1_0 git@github.com:mnmat/EgRegresTrainerLegacy.git 
 cd EgRegresTrainerLegacy
 gmake RegressionTrainerExe -j 8
 gmake RegressionApplierExe -j 8
