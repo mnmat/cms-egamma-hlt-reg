@@ -20,12 +20,8 @@ git clone -b RegNtupleRun3 ssh://git@gitlab.cern.ch:7999/rverma/HLTAnalyserPy.gi
 scramv1 b -j 8
 
 #Setup for making flat ntuple and doing regression
-git clone -b Run3_2023_rverma_CMSSW_12_6_3 git@github.com:ravindkv/EgRegresTrainerLegacy.git 
-. ../../../updateMakeFile.sh
-# The RegressionTrainer might not compile for CMSSW_13_1_0. If there is an issue with including <vdt/vdtMath> then you
-# need to specify the path in the MakeFile for the RegressionTrainer. Replace /cms/vdt/0.4.0-cms with one you can find in the "/cvmfs/cms.cern.ch/${SCRAM_ARCH}/cms/vdt/" folder. E.g.:
-# CXXFLAGS += $(ROOTCFLAGS) -I$(INCLUDE_DIR) $(CMSSWFLAGS) -fexceptions -I$(BOOST_DIR)/include -I/cvmfs/cms.cern.ch/${SCRAM_ARCH}/cms/vdt/0.4.0-9cfb337f7ee459af6d2825bd3518d492/include/
-# If you get linking errors relating to the RooLibrary simply clear the build environment and compile again
+#git clone -b Run3_2023_rverma_CMSSW_12_6_3 git@github.com:ravindkv/EgRegresTrainerLegacy.git #Only compatible with CMSSW_12_6_3
+clone -b Run3_2023_mmatthew_CMSSW_13_1_0 git@github.com:mnmat/EgRegresTrainerLegacy.git 
 cd EgRegresTrainerLegacy
 gmake RegressionTrainerExe -j 8
 gmake RegressionApplierExe -j 8
