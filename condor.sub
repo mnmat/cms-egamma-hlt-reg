@@ -1,0 +1,16 @@
+executable            = create_samples.sh
+arguments             = $(infile) $(outDir) $(nevts) $(idx)
++JobFlavour = "longlunch"
+should_transfer_files = YES
+initialdir = /afs/cern.ch/work/m/mmatthew/private/cms_eg_reg/CMSSW_13_1_0/src
+transfer_input_files  = runWorkflow_2023.py, Analysis.tar.gz, EgRegresTrainerLegacy.tar.gz
+getenv                = true
+output                = condor/output/create_samples.out
+error                 = condor/error/create_samples.err
+log                   = condor/log/create_samples.log
+MY.XRDCP_CREATE_DIR = True
+requirements = (OpSysAndVer =?= "CentOS7")
+
+
+
+queue infile, outDir, nevts, idx from fileQueue.txt
