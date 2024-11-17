@@ -1,47 +1,12 @@
 import os
 import sys
 import subprocess
-sys.dont_write_bytecode = True
-from optparse import OptionParser
 
-#https://egamma-regression.readthedocs.io/en/latest/GetHLTConfig.html
-#----------------------------------------
-#INPUT command-line arguments 
-#----------------------------------------
-parser = OptionParser()
-parser.add_option("--s1Conf",   "--s1Conf",     dest="s1Conf",action="store_true",default=False, help="Get HLT Configuration") 
-parser.add_option("--s2Crab",   "--s2Crab",     dest="s2Crab",action="store_true",default=False, help="Crab submission")
-parser.add_option("--s3Ntuple", "--s3Ntuple",   dest="s3Ntuple",action="store_true",default=False, help="Ntuples")
-parser.add_option("--s4Flat",   "--s4Flat",   dest="s4Flat",action="store_true",default=False, help="Flat Flats")
-parser.add_option("--s5Reg",    "--s5Reg",      dest="s5Reg",action="store_true",default=False, help="Perform regression")
-parser.add_option("--s6Plot",   "--s6Plot",     dest="s6Plot",action="store_true",default=False, help="Plot reg output")
-parser.add_option("--s7NewGT",  "--s7NewGT",    dest="s7NewGT",action="store_true",default=False, help="Create new GT")
-(options, args) = parser.parse_args()
+SAMPLE_GENSIM = "/DoubleElectron_FlatPt-1To100-gun/Phase2Spring24GS-140X_mcRun4_realistic_v4-v1/GEN-SIM"
+SAMPLE_SPRING24 = "/DoubleElectron_FlatPt-1To100-gun/Phase2Spring24DIGIRECOMiniAOD-PU200_Trk1GeV_140X_mcRun4_realistic_v4-v2/GEN-SIM-DIGI-RAW-MINIAOD"
+WORKDIR = "/afs/cern.ch/work/m/mmatthew/private/delete_me/cms-egamma-hlt-reg/" 
+N = 20
 
-s1Conf = options.s1Conf
-s2Crab = options.s2Crab
-s3Ntuple = options.s3Ntuple
-s4Flat = options.s4Flat
-s5Reg = options.s5Reg
-s6Plot = options.s6Plot
-s7NewGT = options.s7NewGT
-
-eosDir = "/store/group/phys_egamma/ec/rverma/egammaRegChain"
-#----------------------------------------
-# Steo-1: Get HLT Configuration file
-# https://twiki.cern.ch/twiki/bin/viewauth/CMS/EGMHLTRun3RecommendationForPAG
-# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideGlobalHLT
-#----------------------------------------
-typeIC = {}
-typeIC["REAL"]  = "126X_mcRun3_2023_forPU65_v1"
-typeIC["IDEAL"] = "126X_mcRun3_2023_forPU65_v1_ECALIdealIC"
-hltMenu  = "/users/sharper/2022/egamma/EgOpen1260GRunV17/V7"
-gRunMenu = "/dev/CMSSW_12_0_0/GRun"
-sample   = "/DoubleElectron_Pt-1To300_gun/Run3Winter23Digi-FlatPU0to70_126X_mcRun3_2023_forPU65_v1-v3/GEN-SIM-RAW"
-#sample   = "/DoublePhoton_Pt-5To300_gun/Run3Winter23Digi-126X_mcRun3_2023_forPU65_v1-v2/GEN-SIM-RAW"
-custom   = "HLTrigger/Configuration/customizeHLTforEGamma.customiseEGammaMenuDev,HLTrigger/Configuration/customizeHLTforEGamma.customiseEGammaInputContent"
-common   = "--mc --process MYHLT --prescale none --max-events 100 --eras Run3 --output none"
-samp = sample.split("/")[1].replace("/", "")
 
 def getFile(sample):
     os.system("voms-proxy-init --voms cms --valid 168:00")
@@ -55,119 +20,70 @@ def getFile(sample):
         exit(0)
     return files_[0]
 
-if s1Conf:
-    inFile = getFile(sample)
-    inFile_ = "root://cms-xrd-global.cern.ch/%s"%inFile
-    #inFile_ = "file:2560000/8c0c4efa-ab57-4152-b313-4ae24aaaf04e.root"
-    print(inFile_)
-    for t in typeIC.keys():
-        cmd = "hltGetConfiguration %s --setup %s --globaltag %s --input %s --customise %s %s > hlt_%s.py"%(hltMenu, gRunMenu, typeIC[t], inFile_, custom, common, t)
-        print(cmd)
-        os.system(cmd)
-        #os.system("cmsRun hlt_%s.py"%t)
+def setup_gensim_cfg():
+    print("WIP")
 
-#----------------------------------------
-# Step-2: Crab submission 
-#----------------------------------------
-crab = """
-from CRABClient.UserUtilities import config
-config = config()
+def setup_spring24_cfg():
+    file = getFile(SAMPLE_SPRING24)
+    setupL1 = " cmsDriver.py Phase2 -s L1,L1TrackTrigger \
+--conditions auto:phase2_realistic_T33 \
+--geometry Extended2026D110 \
+--era Phase2C17I13M9 \
+--eventcontent FEVTDEBUGHLT \
+--datatier GEN-SIM-DIGI-RAW-MINIAOD \
+--customise SLHCUpgradeSimulations/Configuration/aging.customise_aging_1000,Configuration/DataProcessing/Utils.addMonitoring,L1Trigger/Configuration/customisePhase2FEVTDEBUGHLT.customisePhase2FEVTDEBUGHLT,L1Trigger/Configuration/customisePhase2TTOn110.customisePhase2TTOn110 \
+--filein %s  \
+--fileout file:output_Phase2_L1T.root \
+--dirout %s \
+--python_filename rerunL1_cfg.py \
+--inputCommands='keep *, drop l1tPFJets_*_*_*, drop l1tTrackerMuons_l1tTkMuonsGmt*_*_HLT' \
+--outputCommands='drop l1tTrackerMuons_l1tTkMuonsGmt*_*_HLT' \
+--mc \
+-n %s --nThreads 1"%(file,WORKDIR,N)
+    
 
-# config.section_('General')
-config.General.requestName = 'crab_%s'
-config.General.workArea = 'crab_%s'
-config.General.transferOutputs = True
-config.General.transferLogs = True
+    setupHLT = " cmsDriver.py Phase2 -s L1P2GT,HLT:75e33 --processName=HLTX \
+--conditions auto:phase2_realistic_T33 \
+--geometry Extended2026D110 \
+--era Phase2C17I13M9 \
+--eventcontent FEVTDEBUGHLT \
+--customise SLHCUpgradeSimulations/Configuration/aging.customise_aging_1000 \
+--customise EgRegresNtuples/EGammaNtuples/customizeHLTForEgammaNtuples.customiseHLTForEGammaNtuples \
+--customise HLTrigger/Configuration/customizeHLTforEGamma.customiseEGammaMenuDev \
+--filein file:output_Phase2_L1T.root \
+--dirin %s \
+--dirout %s \
+--inputCommands='keep *, drop *_hlt*_*_HLT, drop triggerTriggerFilterObjectWithRefs_l1t*_*_HLT' \
+--mc \
+-n -1 --nThreads 1"%(WORKDIR,WORKDIR) 
 
-# config.section_('JobType')
-config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'hlt_%s.py'
-config.JobType.numCores = 4
-
-# config.Data.inputDBS = 'phys03'
-config.JobType.allowUndistributedCMSSW = True
-config.JobType.maxMemoryMB = 4000
-
-# config.JobType.numCores = 8
-config.Data.inputDataset ='%s'
-# config.Data.splitting = 'Automatic'
-config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 10
-
-config.Data.outLFNDirBase = '%s'
-config.Data.publication = False
-config.Site.storageSite = 'T2_CH_CERN'
-"""
-if s2Crab:
-    os.system("rm -rf crab_*")
-    os.system("source /cvmfs/cms.cern.ch/crab3/crab.sh")
-    for t in typeIC.keys():
-        outFile = open("crab_%s.py"%t, "w")
-        dirName = "%s_%s"%(samp, t)
-        eosDir_ = "%s/s2Crab"%eosDir
-        outStr  = crab%(dirName, dirName, t, sample, eosDir_)
-        print(outStr)
-        print("/eos/cms/%s"%eosDir_) 
-        outFile.write(outStr)
-        #os.system("crab submit %s"%outFile)
-        outFile.close()
-
-#----------------------------------------
-# Step-3: Edm to ntuples 
-#----------------------------------------
-def getFile2(dir_):
-    edm = "find %s -type f | grep output_99\.root"%dir_
-    #edm = "find %s -type f | grep root"%dir_
-    #edm = "find %s -type f -name *.root"%dir_
-    std_output, std_error = subprocess.Popen(edm,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE).communicate()
-    files = std_output.decode("ascii").replace('\n',' ')
-    files_ = files.split(" ")
-    if len(files_)==0:
-        print("No files found")
-        exit(0)
-    return files
-
-if s3Ntuple:
-    for t in typeIC.keys():
-        crabEOSDir = "/eos/cms%s/s2Crab/%s/crab_crab_%s_%s"%(eosDir, samp, samp, t)
-        edmFiles = getFile2(crabEOSDir)
-        ntupDir = "/eos/cms%s/s3Ntuple/%s"%(eosDir, samp)
-        os.system("mkdir -p %s"%ntupDir)
-        ntup = "%s/HLTAnalyzerTree_%s.root"%(ntupDir, t)
-        cmd = "python3 Analysis/HLTAnalyserPy/test/makeRun3Ntup.py -r 1000 %s -o %s &"%(edmFiles, ntup)
-        print(cmd)
-        #os.system("%s"%cmd)
-        #os.system("python3 Analysis/HLTAnalyserPy/test/runMultiThreaded.py --cmd \" %s \" %s -o %s --hadd"%(cmd, edmFiles, ntup))
-
-#----------------------------------------
-# Step-4: Flat ntuples 
-#----------------------------------------
-if s4Flat:
-    for t in typeIC.keys():
-        ntupDir = "/eos/cms%s/s3Ntuple/%s"%(eosDir, samp)
-        flatDir = "/eos/cms%s/s4Flat/%s"%(eosDir, samp)
-        os.system("mkdir -p %s"%flatDir)
-        ntup = "%s/HLTAnalyzerTree_%s.root"%(ntupDir, t)
-        flat = "%s/HLTAnalyzerTree_%s_Flat.root"%(flatDir, t)
-        cmd = "root -l -b -q EgRegresTrainerLegacy/GetFlatNtuple/GetFlatNtuple.C\(\\\"%s\\\",\\\"%s\\\"\) &"%(ntup, flat)
-        print(cmd)
-        os.system("%s"%cmd)
-
-if s5Reg:
-    cmd1 = "cd EgRegresTrainerLegacy"
-    cmd2 = "export PATH=$PATH:./bin/$SCRAM_ARCH"
-    cmd3 = "export ROOT_INCLUDE_PATH=$ROOT_INCLUDE_PATH:$PWD/include"
-    ntupDir = "/eos/cms%s/s4Flat/%s"%(eosDir, samp)
-    regDir  = "/eos/cms%s/s5Reg/%s"%(eosDir, samp)
-    os.system("rm -r %s"%regDir)
-    os.system("mkdir -p %s"%regDir)
-    cmd4 = "python3 scripts/runSCRegTrainings.py --era \"Run3\" -i %s -o %s"%(ntupDir, regDir)
-    print("%s && %s && %s && %s && cd .."%(cmd1, cmd2, cmd3, cmd4))
-
-if s6Plot:
-    regDir  = "/eos/cms%s/s5Reg/%s"%(eosDir, samp)
-    cmd = "python3 EgRegresTrainerLegacy/Plot_mean.py -i %s"%regDir
-    print(cmd)
-    os.system(cmd)
+    os.system("voms-proxy-init --voms cms --valid 168:00")
+    os.system(setupL1)
+    os.system(setupHLT)
 
 
+def run_reg():
+    ntupDir = "%s/Flat"%WORKDIR
+    regDir = "%s/Reg"%WORKDIR
+    cmd1 = "mkdir %s"%ntupDir
+    cmd2 = "mkdir %s"%regDir
+    os.system("%s;%s"%(cmd1,cmd2))
+
+    cmd3 = "cd CMSSW_14_2_0_pre2/src/EgRegresTrainerLegacy"
+    cmd4 = "export PATH=$PATH:./bin/$SCRAM_ARCH"
+    cmd5 = "export ROOT_INCLUDE_PATH=$ROOT_INCLUDE_PATH:$PWD/include"
+    cmd6 = "python3 scripts/runSCRegTrainings.py --era \"Run3\" -i %s -o %s"%(ntupDir, regDir)
+    os.system("%s;%s;%s;%s"%(cmd3, cmd4, cmd5, cmd6))
+
+def create_train_test_split():
+    # TODO: Change to realistic train-test split
+    # Currently only serves to set up a working dummy setup for the RegressionTrainer
+    ntupDir = "%s/Flat"%WORKDIR
+    cmd1 = "mkdir %s"%ntupDir
+    cmd2 = "mv %s/output.root %s/HLTAnalyzerTree_IDEAL_Flat_train.root"%(WORKDIR,ntupDir)
+    cmd3 = "cp %s/HLTAnalyzerTree_IDEAL_Flat_train.root %s/HLTAnalyzerTree_IDEAL_Flat_test.root"%(ntupDir,ntupDir)
+    os.system("%s;%s;%s"%(cmd1,cmd2,cmd3))
+
+setup_spring24_cfg()
+create_train_test_split()
+run_reg()
