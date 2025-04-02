@@ -6,7 +6,7 @@ from optparse import OptionParser
 
 SAMPLE_GENSIM = "/DoubleElectron_FlatPt-1To100-gun/Phase2Spring24GS-140X_mcRun4_realistic_v4-v1/GEN-SIM"
 SAMPLE_SPRING24 = "/DoubleElectron_FlatPt-1To100-gun/Phase2Spring24DIGIRECOMiniAOD-PU200_Trk1GeV_140X_mcRun4_realistic_v4-v2/GEN-SIM-DIGI-RAW-MINIAOD"
-WORKDIR = "/afs/cern.ch/work/m/mmatthew/private/test_bdt/cms-egamma-hlt-reg/"
+WORKDIR = "/afs/cern.ch/work/m/mmatthew/private/test_bdt/cms-egamma-hlt-reg/" # Change this to current directory! Otherwise there is an issue with moving the output.root file from the EGammaNtuplizer
 N = 20
 
 
