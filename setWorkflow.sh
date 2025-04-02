@@ -4,8 +4,8 @@
 #Setup egamma regression packages 
 #----------------------------------------
 export SCRAM_ARCH=el9_amd64_gcc12
-cmsrel CMSSW_14_2_0_pre2 
-cd CMSSW_14_2_0_pre2/src
+cmsrel CMSSW_15_1_0_pre1 
+cd CMSSW_15_1_0_pre1/src
 
 cmsenv
 git cms-init
@@ -16,6 +16,8 @@ cd EgRegresNtuples
 git clone git@github.com:mnmat/EGammaNtuples.git
 scram b -j 8
 cd ..
+git cms-merge-topic waredjeb:add_superclusters_to_event_content_15_1_X
+scram b -j 8
 
 git clone -b Run3_2023_mmatthew_CMSSW_13_1_0 git@github.com:mnmat/EgRegresTrainerLegacy.git 
 cd EgRegresTrainerLegacy
