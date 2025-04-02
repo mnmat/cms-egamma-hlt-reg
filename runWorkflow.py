@@ -11,14 +11,23 @@ N = 20
 
 
 parser = OptionParser()
+parser.add_option("--outDir", "--outDir",         dest="outDir", action="store", default=None ,help="Specify outdir")
 parser.add_option("--s1ConfL1", "--s1ConfL1", dest="s1ConfL1", action="store_true", default=False, help="Setup config file to rerun L1")
 parser.add_option("--s2ConfHLT", "--s2ConfHLT", dest="s2ConfHLT", action="store_true", default=False, help="Setup config file to run HLT")
-parser.add_option("--s3Reg", "--s3Reg", dest="s3Reg",action="store_true",default=False,help="Run regression")
+parser.add_option("--s3TrainTestSplit", "--s3TrainTestSplit", dest="s3TrainTestSplit",action="store_true",default=False,help="Split dataset into training and test set")
+parser.add_option("--s4Reg", "--s4Reg", dest="s4Reg",action="store_true",default=False,help="Run regression")
+
 
 (options, args) = parser.parse_args()
 s1ConfL1 = options.s1ConfL1
 s2ConfHLT = options.s2ConfHLT
-s3Reg = options.s3Reg
+s3TrainTestSplit = options.s3TrainTestSplit
+s4Reg = options.s4Reg
+
+if options.outDir:
+    outdir = options.outDir
+else:
+    outdir = WORKDIR
 
 
 def getFile(sample):
@@ -52,7 +61,7 @@ def setup_spring24_l1_cfg():
 --inputCommands='keep *, drop l1tPFJets_*_*_*, drop l1tTrackerMuons_l1tTkMuonsGmt*_*_HLT' \
 --outputCommands='drop l1tTrackerMuons_l1tTkMuonsGmt*_*_HLT' \
 --mc \
--n %s --nThreads 1"%(file,WORKDIR,N)
+-n %s --nThreads 1"%(file,outdir,N)
     
     os.system("voms-proxy-init --voms cms --valid 168:00")
     os.system(setupL1)
@@ -73,13 +82,13 @@ def setup_spring24_hlt_cfg():
 --dirout %s \
 --inputCommands='keep *, drop *_hlt*_*_HLT, drop triggerTriggerFilterObjectWithRefs_l1t*_*_HLT' \
 --mc \
--n -1 --nThreads 1"%(WORKDIR,WORKDIR) 
+-n -1 --nThreads 1"%(outdir,outdir) 
     os.system("voms-proxy-init --voms cms --valid 168:00")
     os.system(setupHLT)
 
 def run_reg():
-    ntupDir = "%s/Flat"%WORKDIR
-    regDir = "%s/Reg"%WORKDIR
+    ntupDir = "%s/Flat"%outdir
+    regDir = "%s/Reg"%outdir
     cmd1 = "mkdir %s"%ntupDir
     cmd2 = "mkdir %s"%regDir
     os.system("%s;%s"%(cmd1,cmd2))
@@ -93,9 +102,9 @@ def run_reg():
 def create_train_test_split():
     # TODO: Change to realistic train-test split
     # Currently only serves to set up a working dummy setup for the RegressionTrainer
-    ntupDir = "%s/Flat"%WORKDIR
+    ntupDir = "%s/Flat"%outdir
     cmd1 = "mkdir %s"%ntupDir
-    cmd2 = "mv %s/output.root %s/HLTAnalyzerTree_IDEAL_Flat_train.root"%(WORKDIR,ntupDir)
+    cmd2 = "mv %s/output.root %s/HLTAnalyzerTree_IDEAL_Flat_train.root"%(outdir,ntupDir)
     cmd3 = "cp %s/HLTAnalyzerTree_IDEAL_Flat_train.root %s/HLTAnalyzerTree_IDEAL_Flat_test.root"%(ntupDir,ntupDir)
     os.system("%s;%s;%s"%(cmd1,cmd2,cmd3))
 
@@ -104,11 +113,12 @@ if s1ConfL1:
     setup_spring24_l1_cfg()
 if s2ConfHLT:
     setup_spring24_hlt_cfg()
-if s3Reg:
+if s3TrainTestSplit:
     create_train_test_split()
+if s4Reg:
     run_reg()
 
-if not (s1ConfL1 or s2ConfHLT or s3Reg):
+if not (s1ConfL1 or s2ConfHLT or s3TrainTestSplit or s4Reg):
     setup_spring24_l1_cfg()
     setup_spring24_hlt_cfg()
     create_train_test_split()
