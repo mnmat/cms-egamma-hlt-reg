@@ -16,7 +16,7 @@ cd EgRegresNtuples
 git clone git@github.com:mnmat/EGammaNtuples.git
 scram b -j 8
 cd ..
-git cms-merge-topic waredjeb:add_superclusters_to_event_content_15_1_X
+git cms-merge-topic mnmat:add_superclusters_to_event_content_15_1_X
 scram b -j 8
 
 git clone -b Run3_2023_mmatthew_CMSSW_13_1_0 git@github.com:mnmat/EgRegresTrainerLegacy.git 
