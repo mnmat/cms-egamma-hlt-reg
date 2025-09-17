@@ -21,4 +21,4 @@ git clone -b Run3_2023_mmatthew_CMSSW_13_1_0 git@github.com:mnmat/EgRegresTraine
 cd EgRegresTrainerLegacy
 gmake RegressionTrainerExe -j 8
 gmake RegressionApplierExe -j 8
-gmake RegressionApplier_newExe - j 8
+gmake RegressionApplier_newExe -j 8
