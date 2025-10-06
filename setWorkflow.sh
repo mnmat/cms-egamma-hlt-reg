@@ -4,8 +4,12 @@
 #Setup egamma regression packages 
 #----------------------------------------
 export SCRAM_ARCH=el9_amd64_gcc12
+
 cmsrel CMSSW_14_2_0_pre2 
 cd CMSSW_14_2_0_pre2/src
+
+#cmsrel CMSSW_14_0_9 # For GenSim
+#cd CMSSW_14_0_9/src # For GenSim
 
 cmsenv
 git cms-init

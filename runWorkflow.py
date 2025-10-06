@@ -21,7 +21,28 @@ def getFile(sample):
     return files_[0]
 
 def setup_gensim_cfg():
-    print("WIP")
+    file = "/eos/cms/store/group/dpg_hgcal/comm_hgcal/mmatthew/BDT/high_stats/electrons/s1GenSim/00c66fb0-0aae-421d-a429-12abec9dbb2e.root"
+    setupHLT = "cmsDriver.py \
+--python_filename test_noL1P2GT_cfg.py \
+--eventcontent FEVTDEBUGHLT \
+--pileup AVE_200_BX_25ns \
+--customise SLHCUpgradeSimulations/Configuration/aging.customise_aging_1000,SimGeneral/MixingModule/customiseStoredTPConfig.higherPtTP,Configuration/DataProcessing/Utils.addMonitoring,L1Trigger/Configuration/customisePhase2FEVTDEBUGHLT.customisePhase2FEVTDEBUGHLT,L1Trigger/Configuration/customisePhase2TTOn110.customisePhase2TTOn110,EgRegresNtuples/EGammaNtuples/customizeHLTForEgammaNtuples.customiseHLTForEGammaNtuples,HLTrigger/Configuration/customizeHLTforEGamma.customiseEGammaMenuDev,HLTrigger/Configuration/customizeHLTforEGamma.customiseEGammaInputContent \
+ --datatier GEN-SIM-DIGI-RAW \
+--fileout file:test.root \
+--pileup_input dbs:/MinBias_TuneCP5_14TeV-pythia8/Phase2Spring24GS-140X_mcRun4_realistic_v4-v1/GEN-SIM \
+--conditions 140X_mcRun4_realistic_v4 \
+--step DIGI:pdigi_valid,L1TrackTrigger,L1,DIGI2RAW,HLT:75e33 \
+--nThreads 8 \
+--geometry Extended2026D110 \
+--nStreams 2 \
+--filein file:/eos/cms/store/group/dpg_hgcal/comm_hgcal/mmatthew/BDT/high_stats/electrons/s1GenSim/4d53b6f8-d99b-407f-a03a-516709227b66.root \
+--era Phase2C17I13M9 \
+--mc \
+-n 8"
+    os.system("voms-proxy-init --voms cms --valid 168:00")
+    os.system(setupHLT)
+ 
+    
 
 def setup_spring24_cfg():
     file = getFile(SAMPLE_SPRING24)
@@ -84,6 +105,7 @@ def create_train_test_split():
     cmd3 = "cp %s/HLTAnalyzerTree_IDEAL_Flat_train.root %s/HLTAnalyzerTree_IDEAL_Flat_test.root"%(ntupDir,ntupDir)
     os.system("%s;%s;%s"%(cmd1,cmd2,cmd3))
 
-setup_spring24_cfg()
+#setup_spring24_cfg()
+setup_gensim_cfg()
 create_train_test_split()
 run_reg()
