@@ -13,7 +13,7 @@ evts="$2"
 skip="$3"
 ptype="$4"
 idx="$5"
-outdir="$6"
+outdir="/eos/cms/store/group/dpg_hgcal/comm_hgcal/mmatthew/BDT/test"
 
 cmsRun rerunL1_cfg.py $file $evts $skip $idx
 cmsRun Phase2_L1P2GT_HLT.py $ptype
@@ -26,7 +26,7 @@ xrdcopy -f output.root $outdir/output_$idx.root"""
 
 def write_cond_file(path="."):
     content = """executable            = create_samples.sh
-arguments             = $(file) $(evts) $(skip) $(idx)
+arguments             = $(file) $(evts) $(skip) $(ptype) $(idx)
 +JobFlavour           = "workday"
 should_transfer_files = YES
 transfer_input_files  = rerunL1_cfg.py,Phase2_L1P2GT_HLT.py
@@ -37,7 +37,7 @@ log                   = condor/log/create_samples.log
 MY.XRDCP_CREATE_DIR   = True
 +DesiredOS            = "EL9"
 max_materialize       = 500
-queue file,evts,skip,idx from files.txt
+queue file,evts,skip,ptype,idx from files.txt
 """
 
     fname = os.path.join(path,"condor.sub")
@@ -85,6 +85,11 @@ def process_l1_config(file,path="."):
     # Include skipping of events
     lines.insert(idx+1,"skipEvents = cms.untracked.uint32(int(skip)),\n")
 
+    # Set output filename
+
+    idx = find_line_in_block(lines,"process.FEVTDEBUGHLToutput","fileName")
+    lines[idx] = "fileName = cms.untracked.string('file:output_Phase2_L1T.root'),\n"
+
     new_file = os.path.join(path,file.split("/")[-1])
     with open(new_file,"w") as f:
         for l in lines:
@@ -104,6 +109,12 @@ def process_hlt_config(file,path="."):
     idx = lines.index("process = customiseHLTForEGammaNtuples(process)\n")
     lines.insert(idx+1,"process.EGammaNtuples.pType = cms.string(ptype)\n")
 
+    idx = find_line_in_block(lines,"process.FEVTDEBUGHLToutput","fileName")
+    lines[idx] = "fileName = cms.untracked.string('file:Phase2_L1P2GT_HLT.root'),\n"
+
+    idx = find_line_in_block(lines,"process.source","fileNames")
+    lines[idx] = "fileNames = cms.untracked.vstring('file:output_Phase2_L1T.root'),\n"
+
     new_file = os.path.join(path,file.split("/")[-1])
     with open(new_file,"w") as f:
         for l in lines:
@@ -115,10 +126,14 @@ def setup_directory(path="."):
 
 
 path = "Spring24"
-l1_file = "/afs/cern.ch/work/m/mmatthew/private/test_bdt/GenSim/cms-egamma-hlt-reg/rerunL1_cfg.py"
-hlt_file = "/afs/cern.ch/work/m/mmatthew/private/test_bdt/GenSim/cms-egamma-hlt-reg/test_noL1P2GT_cfg.py"
+l1_file = "../rerunL1_cfg.py"
+hlt_file = "../Phase2_L1P2GT_HLT.py"
 #setup_directory(path)
-#write_cond_file(path)
-#write_exec_file(path)
+write_cond_file(path)
+write_exec_file(path)
 process_l1_config(l1_file,path)    
 process_hlt_config(hlt_file,path)
+
+# Make grid proxy available for htcondor to use xrootd. You can also follow the recommendations here: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRABPrepareLocal 
+os.system("export X509_USER_PROXY=~/.gridProxy")
+os.system("voms-proxy-init --rfc --voms cms -valid 192:00")

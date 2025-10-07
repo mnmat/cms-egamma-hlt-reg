@@ -28,9 +28,10 @@ def get_event(file):
     return evt
 
 total_events = 294618 # 2M samples
+total_events = 1000
 events_per_job = 100
 dataset = "/DoubleElectron_FlatPt-1To100-gun/Phase2Spring24DIGIRECOMiniAOD-PU200_Trk1GeV_140X_mcRun4_realistic_v4-v2/GEN-SIM-DIGI-RAW-MINIAOD"
-dataset = "/DoublePhoton_FlatPt-1To100-gun/Phase2Spring24DIGIRECOMiniAOD-PU200_Trk1GeV_140X_mcRun4_realistic_v4-v2/GEN-SIM-DIGI-RAW-MINIAOD"
+#dataset = "/DoublePhoton_FlatPt-1To100-gun/Phase2Spring24DIGIRECOMiniAOD-PU200_Trk1GeV_140X_mcRun4_realistic_v4-v2/GEN-SIM-DIGI-RAW-MINIAOD"
 
 files = get_files(dataset)
 
@@ -51,8 +52,9 @@ with open("files.txt","w") as file:
     idx = 0
     for f,e in files:  # or another encoding
         for i in range(0,int(e),events_per_job):
-            line = "%s,%s,%s,%s\n"%(f,events_per_job,i,ptype,idx)
+            line = "%s,%s,%s,%s,%s\n"%(f,events_per_job,i,ptype,idx)
             idx = idx+1
             file.write(line)
-        
+            if idx*events_per_job >= total_events:
+                exit()
 
