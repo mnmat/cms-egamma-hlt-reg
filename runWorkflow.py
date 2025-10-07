@@ -1,12 +1,12 @@
 import os
 import sys
 import subprocess
+import argparse
 
 SAMPLE_GENSIM = "/DoubleElectron_FlatPt-1To100-gun/Phase2Spring24GS-140X_mcRun4_realistic_v4-v1/GEN-SIM"
 SAMPLE_SPRING24 = "/DoubleElectron_FlatPt-1To100-gun/Phase2Spring24DIGIRECOMiniAOD-PU200_Trk1GeV_140X_mcRun4_realistic_v4-v2/GEN-SIM-DIGI-RAW-MINIAOD"
 WORKDIR = "/afs/cern.ch/work/m/mmatthew/private/delete_me/cms-egamma-hlt-reg/" 
 N = 20
-
 
 def getFile(sample):
     os.system("voms-proxy-init --voms cms --valid 168:00")
@@ -105,7 +105,30 @@ def create_train_test_split():
     cmd3 = "cp %s/HLTAnalyzerTree_IDEAL_Flat_train.root %s/HLTAnalyzerTree_IDEAL_Flat_test.root"%(ntupDir,ntupDir)
     os.system("%s;%s;%s"%(cmd1,cmd2,cmd3))
 
-#setup_spring24_cfg()
-setup_gensim_cfg()
-create_train_test_split()
-run_reg()
+parser = argparse.ArgumentParser()
+parser.add_argument("--reg_only",action="store_true",default=False)
+parser.add_argument("--sample_gensim",type=str,default = "/DoubleElectron_FlatPt-1To100-gun/Phase2Spring24GS-140X_mcRun4_realistic_v4-v1/GEN-SIM")
+parser.add_argument("--sample_spring24",type=str,default = "/DoubleElectron_FlatPt-1To100-gun/Phase2Spring24DIGIRECOMiniAOD-PU200_Trk1GeV_140X_mcRun4_realistic_v4-v2/GEN-SIM-DIGI-RAW-MINIAOD")
+parser.add_argument("--n",type=int,default=20)
+parser.add_argument("--work_dir",type=str,default="/afs/cern.ch/work/m/mmatthew/private/delete_me/cms-egamma-hlt-reg/")
+parser.add_argument("--gen_sim",action="store_true",default=False)
+args = parser.parse_args()
+
+
+
+WORKDIR = args.work_dir
+N = args.n
+SAMPLE_GENSIM = args.sample_gensim
+SAMPLE_SPRING24 = args.sample_spring24
+
+print(args)
+
+if not args.reg_only:
+    if not args.gen_sim:
+        setup_spring24_cfg()
+    else: 
+        setup_gensim_cfg()
+    create_train_test_split()
+    run_reg()
+else:
+    run_reg()
