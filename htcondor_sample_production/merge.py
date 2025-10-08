@@ -1,4 +1,4 @@
-import glo
+import glob
 import os
 import argparse
 
@@ -9,7 +9,7 @@ parser.add_argument("--path", type=str, default="/eos/cms/store/group/dpg_hgcal/
 args = parser.parse_args()
 
 path = args.path
-outdir = os.path.join(path,"s4Flat_genMatched")
+outdir = os.path.join(path,"Flat")
 
 if not os.path.exists(outdir):
     os.mkdir(outdir)
