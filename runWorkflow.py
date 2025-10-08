@@ -5,7 +5,7 @@ import argparse
 
 SAMPLE_GENSIM = "/DoubleElectron_FlatPt-1To100-gun/Phase2Spring24GS-140X_mcRun4_realistic_v4-v1/GEN-SIM"
 SAMPLE_SPRING24 = "/DoubleElectron_FlatPt-1To100-gun/Phase2Spring24DIGIRECOMiniAOD-PU200_Trk1GeV_140X_mcRun4_realistic_v4-v2/GEN-SIM-DIGI-RAW-MINIAOD"
-WORKDIR = "/afs/cern.ch/work/m/mmatthew/private/delete_me/cms-egamma-hlt-reg/" 
+WORKDIR = "/afs/cern.ch/work/m/mmatthew/private/test_workflow/cms-egamma-hlt-reg/" 
 N = 20
 
 def getFile(sample):
@@ -101,7 +101,7 @@ def create_train_test_split():
     # Currently only serves to set up a working dummy setup for the RegressionTrainer
     ntupDir = "%s/Flat"%WORKDIR
     cmd1 = "mkdir %s"%ntupDir
-    cmd2 = "mv %s/output.root %s/HLTAnalyzerTree_IDEAL_Flat_train.root"%(WORKDIR,ntupDir)
+    cmd2 = "mv output.root %s/HLTAnalyzerTree_IDEAL_Flat_train.root"%(ntupDir)
     cmd3 = "cp %s/HLTAnalyzerTree_IDEAL_Flat_train.root %s/HLTAnalyzerTree_IDEAL_Flat_test.root"%(ntupDir,ntupDir)
     os.system("%s;%s;%s"%(cmd1,cmd2,cmd3))
 
@@ -124,10 +124,10 @@ SAMPLE_SPRING24 = args.sample_spring24
 print(args)
 
 if not args.reg_only:
-    if not args.gen_sim:
-        setup_spring24_cfg()
-    else: 
-        setup_gensim_cfg()
+    #if not args.gen_sim:
+    #    setup_spring24_cfg()
+    #else: 
+    #    setup_gensim_cfg()
     create_train_test_split()
     run_reg()
 else:

@@ -13,7 +13,7 @@ evts="$2"
 skip="$3"
 ptype="$4"
 idx="$5"
-outdir="/eos/cms/store/group/dpg_hgcal/comm_hgcal/mmatthew/BDT/test"
+outdir="/afs/cern.ch/work/m/mmatthew/private/delete_me/cms-egamma-hlt-reg"
 
 cmsRun rerunL1_cfg.py $file $evts $skip $idx
 cmsRun Phase2_L1P2GT_HLT.py $ptype
