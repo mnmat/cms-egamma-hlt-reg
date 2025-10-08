@@ -128,7 +128,7 @@ def setup_directory(path="."):
 path = "Spring24"
 l1_file = "../rerunL1_cfg.py"
 hlt_file = "../Phase2_L1P2GT_HLT.py"
-#setup_directory(path)
+setup_directory(path)
 write_cond_file(path)
 write_exec_file(path)
 process_l1_config(l1_file,path)    
