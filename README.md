@@ -1,6 +1,11 @@
 # cms-egamma-hlt-reg
 
 This repo provides tools to setup and run the phase2 egamma regression for Spring24 samples.
+Before starting, make sure to set your preferred working directory in:
+- `run_workflow.py`
+- `setup_htcondor.py``
+- `merge.py`
+ 
 
 ### Setup Environment
 
@@ -33,6 +38,10 @@ The input variables mentioned above are provided with the help of a queue. To cr
 python3 fillQueue_Spring24.py
 ```
 Move the queue into the folder containing the htcondor scripts, "Spring24" when following this tutorial.
+
+```
+mv files.txt Spring24
+```
 
 #### Run HTCondor
 
