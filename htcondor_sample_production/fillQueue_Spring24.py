@@ -2,6 +2,7 @@ import os
 import sys
 import subprocess
 import io
+import argparse
 
 def get_files(dataset):
     cmd = "dasgoclient --query='file dataset=%s | grep file.name, file.nevents'"%dataset
@@ -27,13 +28,20 @@ def get_event(file):
     evt = output.decode('utf-8').split('\n')
     return evt
 
-total_events = 294618 # 2M samples
-total_events = 1000
-events_per_job = 100
-dataset = "/DoubleElectron_FlatPt-1To100-gun/Phase2Spring24DIGIRECOMiniAOD-PU200_Trk1GeV_140X_mcRun4_realistic_v4-v2/GEN-SIM-DIGI-RAW-MINIAOD"
-#dataset = "/DoublePhoton_FlatPt-1To100-gun/Phase2Spring24DIGIRECOMiniAOD-PU200_Trk1GeV_140X_mcRun4_realistic_v4-v2/GEN-SIM-DIGI-RAW-MINIAOD"
+parser = argparse.ArgumentParser()
+parser.add_argument("--total_events",type=int,default=300000)
+parser.add_argument("--events_per_job",type=int,default=100)
+parser.add_argument("--dataset",type=str,default="/DoubleElectron_FlatPt-1To100-gun/Phase2Spring24DIGIRECOMiniAOD-PU200_Trk1GeV_140X_mcRun4_realistic_v4-v2/GEN-SIM-DIGI-RAW-MINIAOD")
+args = parser.parse_args()
+dataset = args.dataset
+total_events = args.total_events
+events_per_job = args.events_per_job
 
-files = get_files(dataset)
+try:
+    files = get_files(dataset)
+except:
+    print("Failed getting dataset. Do you have a valid grid proxy?")
+    exit()
 
 if "lectron" in dataset:
     ptype = "ele"
