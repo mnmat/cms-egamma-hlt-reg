@@ -5,10 +5,10 @@ import argparse
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("--path", type=str, default="/eos/cms/store/group/dpg_hgcal/comm_hgcal/mmatthew/BDT/test") 
+parser.add_argument("--work_dir", type=str, default="/afs/cern.ch/work/m/mmatthew/private/test_workflow/cms-egamma-hlt-reg/Data") 
 args = parser.parse_args()
 
-path = args.path
+path = args.work_dir
 outdir = os.path.join(path,"Flat")
 
 if not os.path.exists(outdir):
