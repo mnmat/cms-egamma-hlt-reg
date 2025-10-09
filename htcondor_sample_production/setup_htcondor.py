@@ -5,7 +5,7 @@ def setup_condor_folder(path="."):
     os.makedirs(os.path.join(path,"condor/log"))
     os.makedirs(os.path.join(path,"condor/output"))
     
-def write_exec_file(path="."):
+def write_exec_file(work_dir,path="."):
     content = """#!/bin/bash
 
 file="$1"
@@ -13,12 +13,12 @@ evts="$2"
 skip="$3"
 ptype="$4"
 idx="$5"
-outdir="/afs/cern.ch/work/m/mmatthew/private/delete_me/cms-egamma-hlt-reg"
+outdir="%s"
 
 cmsRun rerunL1_cfg.py $file $evts $skip $idx
 cmsRun Phase2_L1P2GT_HLT.py $ptype
 
-xrdcopy -f output.root $outdir/output_$idx.root"""
+xrdcopy -f output.root $outdir/output_$idx.root"""%work_dir
     fname = os.path.join(path,"create_samples.sh")
     with open(fname,"w") as f:
         f.write(content)
@@ -128,9 +128,10 @@ def setup_directory(path="."):
 path = "Spring24"
 l1_file = "../rerunL1_cfg.py"
 hlt_file = "../Phase2_L1P2GT_HLT.py"
+work_dir = "/afs/cern.ch/work/m/mmatthew/private/test_workflow/cms-egamma-hlt-reg/Data"
 setup_directory(path)
 write_cond_file(path)
-write_exec_file(path)
+write_exec_file(work_dir,path)
 process_l1_config(l1_file,path)    
 process_hlt_config(hlt_file,path)
 
