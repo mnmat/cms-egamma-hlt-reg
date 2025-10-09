@@ -59,7 +59,7 @@ cd Spring24
 condor_submit condor.sub
 ```
 
-Make sure that the settings in the condor.sub file are appropriate with respect to duration, how many jobs you want to start simultaneously etc.
+Make sure that the settings in the condor.sub file are appropriate with respect to duration, how many jobs you want to start simultaneously etc. It is recommended to start with a low event and file count, i.e. 1 file and a couple of events only, and test htcondor using the `espresso` setting for duration to limit computing resources.
 
 #### Prepare output files for BDT
 
